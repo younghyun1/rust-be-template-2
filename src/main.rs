@@ -6,6 +6,7 @@ static GLOBAL: MiMalloc = MiMalloc;
 
 pub mod build_info;
 pub mod domain;
+pub mod state;
 
 fn main() -> anyhow::Result<()> {
     let app_start_time = tokio::time::Instant::now();

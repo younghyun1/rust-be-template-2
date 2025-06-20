@@ -25,6 +25,18 @@ pub struct IsoCountry {
     pub country_primary_language: i32,
 }
 
+pub struct IsoCountryStatic {
+    pub country_code: i32, // ISO-defined, not autoincremented
+    pub country_alpha2: &'static str,
+    pub country_alpha3: &'static str,
+    pub country_eng_name: &'static str,
+    pub country_currency: i32,
+    pub phone_prefix: &'static str,
+    pub country_flag: &'static str,
+    pub is_country: bool,
+    pub country_primary_language: i32,
+}
+
 pub struct IsoCountryInsert {
     pub country_code: i32,
     pub country_alpha2: String,

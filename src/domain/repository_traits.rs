@@ -16,3 +16,18 @@ pub trait AsyncRepository<ID, Entity, EntityInsert>: Send + Sync {
     where
         M: IntoIterator<Item = ID> + Send + Sync;
 }
+
+pub trait SyncRepository<ID, Entity, EntityInsert>: Send + Sync {
+    fn create(&self, entity: EntityInsert) -> anyhow::Result<Entity>;
+    fn create_many(&self, entities: Vec<EntityInsert>) -> anyhow::Result<Vec<Entity>>;
+    fn read(&self, id: ID) -> anyhow::Result<Option<Entity>>;
+    fn read_all(&self) -> anyhow::Result<Vec<Entity>>;
+    fn update(&self, id: ID, entity: EntityInsert) -> anyhow::Result<Entity>;
+    fn update_many<M>(&self, entities: M) -> anyhow::Result<Vec<Entity>>
+    where
+        M: IntoIterator<Item = (ID, EntityInsert)> + Send + Sync;
+    fn delete(&self, id: ID) -> anyhow::Result<Entity>;
+    fn delete_many<M>(&self, ids: M) -> anyhow::Result<Vec<Entity>>
+    where
+        M: IntoIterator<Item = ID> + Send + Sync;
+}
