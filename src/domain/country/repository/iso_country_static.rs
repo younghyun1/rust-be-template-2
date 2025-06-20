@@ -9,9 +9,8 @@ pub mod generated {
 pub use generated::{ISO_COUNTRIES, by_alpha2, by_alpha3, by_code};
 
 use crate::domain::country::iso_country::{IsoCountry, IsoCountryInsert, IsoCountryStatic};
-use crate::domain::repository_traits::AsyncRepository;
+use crate::domain::repository_traits::SyncRepository;
 use anyhow::Result;
-use async_trait::async_trait;
 
 /// Static-specific lookup extension for IsoCountry
 pub trait IsoCountryStaticLookups {
@@ -56,41 +55,39 @@ impl IsoCountryStatic {
         }
     }
 }
-
-#[async_trait]
-impl AsyncRepository<i32, IsoCountry, IsoCountryInsert> for IsoCountryStaticRepository {
-    async fn create(&self, _entity: IsoCountryInsert) -> Result<IsoCountry> {
+impl SyncRepository<i32, IsoCountry, IsoCountryInsert> for IsoCountryStaticRepository {
+    fn create(&self, _entity: IsoCountryInsert) -> Result<IsoCountry> {
         Err(anyhow::anyhow!("Cannot create into static repository"))
     }
 
-    async fn create_many(&self, _entities: Vec<IsoCountryInsert>) -> Result<Vec<IsoCountry>> {
+    fn create_many(&self, _entities: Vec<IsoCountryInsert>) -> Result<Vec<IsoCountry>> {
         Err(anyhow::anyhow!("Cannot create_many into static repository"))
     }
 
-    async fn read(&self, id: i32) -> Result<Option<IsoCountry>> {
+    fn read(&self, id: i32) -> Result<Option<IsoCountry>> {
         Ok(by_code(id).map(|s| s.to_owned()))
     }
 
-    async fn read_all(&self) -> Result<Vec<IsoCountry>> {
+    fn read_all(&self) -> Result<Vec<IsoCountry>> {
         Ok(ISO_COUNTRIES.iter().map(|s| s.to_owned()).collect())
     }
 
-    async fn update(&self, _id: i32, _entity: IsoCountryInsert) -> Result<IsoCountry> {
+    fn update(&self, _id: i32, _entity: IsoCountryInsert) -> Result<IsoCountry> {
         Err(anyhow::anyhow!("Cannot update static repository"))
     }
 
-    async fn update_many<M>(&self, _entities: M) -> Result<Vec<IsoCountry>>
+    fn update_many<M>(&self, _entities: M) -> Result<Vec<IsoCountry>>
     where
         M: IntoIterator<Item = (i32, IsoCountryInsert)> + Send + Sync,
     {
         Err(anyhow::anyhow!("Cannot update_many static repository"))
     }
 
-    async fn delete(&self, _id: i32) -> Result<IsoCountry> {
+    fn delete(&self, _id: i32) -> Result<IsoCountry> {
         Err(anyhow::anyhow!("Cannot delete from static repository"))
     }
 
-    async fn delete_many<M>(&self, _ids: M) -> Result<Vec<IsoCountry>>
+    fn delete_many<M>(&self, _ids: M) -> Result<Vec<IsoCountry>>
     where
         M: IntoIterator<Item = i32> + Send + Sync,
     {
