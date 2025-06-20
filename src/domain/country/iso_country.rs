@@ -1,7 +1,7 @@
 use diesel::{Queryable, prelude::QueryableByName};
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize, QueryableByName, Queryable)]
+#[derive(Debug, Clone, Serialize, Deserialize, QueryableByName, Queryable)]
 #[diesel(table_name = iso_country)]
 #[diesel(primary_key(country_code))]
 pub struct IsoCountry {

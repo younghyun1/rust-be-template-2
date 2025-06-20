@@ -1,6 +1,8 @@
 use anyhow::anyhow;
 use mimalloc::MiMalloc;
 
+use crate::domain::country::service::country_service::CountryService;
+
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 

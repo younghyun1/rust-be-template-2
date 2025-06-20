@@ -10,6 +10,7 @@ pub struct IsoCountryDieselAsyncPgRepository<'conn> {
     pub conn: &'conn mut AsyncPgConnection,
 }
 
+// Custom-repository equivalent
 impl<'conn> IsoCountryDieselAsyncPgRepository<'conn> {
     pub fn new(conn: &'conn mut AsyncPgConnection) -> Self {
         Self { conn }

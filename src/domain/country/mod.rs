@@ -1,3 +1,6 @@
+pub mod converter {
+    pub mod country_converter;
+}
 pub mod dto {
     pub mod country_dto;
 }
