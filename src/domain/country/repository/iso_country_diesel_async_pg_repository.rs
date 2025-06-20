@@ -1,5 +1,5 @@
 use crate::domain::country::iso_country::{IsoCountry, IsoCountryInsert};
-use crate::impl_async_repository_for;
+use crate::impl_async_crud_repository_for;
 use diesel_async::AsyncPgConnection;
 
 /// A repository for `IsoCountry` that wraps a mutable reference to an active connection.
@@ -16,7 +16,7 @@ impl<'conn> IsoCountryDieselAsyncPgRepository<'conn> {
 }
 
 // Automatically implement the full AsyncRepository trait for IsoCountry
-impl_async_repository_for!(
+impl_async_crud_repository_for!(
     IsoCountryDieselAsyncPgRepository,
     IsoCountry,
     IsoCountryInsert,

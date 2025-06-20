@@ -13,7 +13,7 @@ use async_trait::async_trait;
 /// * `$schema_module`: The corresponding module from `schema.rs` (e.g., `crate::domain::schema::iso_country`).
 /// * `$pk_column`: The identifier of the primary key column in the schema's dsl (e.g., `country_code`).
 #[macro_export]
-macro_rules! impl_async_repository_for {
+macro_rules! impl_async_crud_repository_for {
     (
         $repo_struct:ident,
         $entity:ty,
