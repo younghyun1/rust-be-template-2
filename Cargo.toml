@@ -1,0 +1,17 @@
+[package]
+name = "rust-be-template-two"
+version = "0.1.1"
+edition = "2024"
+description = "Personal Rust backend template - now with DDD, sanity, tests, etc."
+license = "MIT OR Apache-2.0"
+
+[profile.release]
+opt-level = 3
+codegen-units = 1
+debug = false
+incremental = false
+strip = true
+lto = true
+panic = "unwind"
+
+[dependencies]
