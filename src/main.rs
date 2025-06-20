@@ -1,8 +1,6 @@
 use anyhow::anyhow;
 use mimalloc::MiMalloc;
 
-use crate::domain::country::service::country_service::CountryService;
-
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
@@ -11,6 +9,7 @@ pub mod domain;
 pub mod state;
 
 fn main() -> anyhow::Result<()> {
+    #[allow(unused)]
     let app_start_time = tokio::time::Instant::now();
 
     // main() equivalent

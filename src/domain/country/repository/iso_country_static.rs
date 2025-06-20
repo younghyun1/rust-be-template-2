@@ -55,39 +55,40 @@ impl IsoCountryStatic {
         }
     }
 }
+
 impl SyncRepository<i32, IsoCountry, IsoCountryInsert> for IsoCountryStaticRepository {
-    fn create(&self, _entity: IsoCountryInsert) -> Result<IsoCountry> {
+    fn create(&mut self, _entity: IsoCountryInsert) -> Result<IsoCountry> {
         Err(anyhow::anyhow!("Cannot create into static repository"))
     }
 
-    fn create_many(&self, _entities: Vec<IsoCountryInsert>) -> Result<Vec<IsoCountry>> {
+    fn create_many(&mut self, _entities: Vec<IsoCountryInsert>) -> Result<Vec<IsoCountry>> {
         Err(anyhow::anyhow!("Cannot create_many into static repository"))
     }
 
-    fn read(&self, id: i32) -> Result<Option<IsoCountry>> {
+    fn read(&mut self, id: i32) -> Result<Option<IsoCountry>> {
         Ok(by_code(id).map(|s| s.to_owned()))
     }
 
-    fn read_all(&self) -> Result<Vec<IsoCountry>> {
+    fn read_all(&mut self) -> Result<Vec<IsoCountry>> {
         Ok(ISO_COUNTRIES.iter().map(|s| s.to_owned()).collect())
     }
 
-    fn update(&self, _id: i32, _entity: IsoCountryInsert) -> Result<IsoCountry> {
+    fn update(&mut self, _id: i32, _entity: IsoCountryInsert) -> Result<IsoCountry> {
         Err(anyhow::anyhow!("Cannot update static repository"))
     }
 
-    fn update_many<M>(&self, _entities: M) -> Result<Vec<IsoCountry>>
+    fn update_many<M>(&mut self, _entities: M) -> Result<Vec<IsoCountry>>
     where
         M: IntoIterator<Item = (i32, IsoCountryInsert)> + Send + Sync,
     {
         Err(anyhow::anyhow!("Cannot update_many static repository"))
     }
 
-    fn delete(&self, _id: i32) -> Result<IsoCountry> {
+    fn delete(&mut self, _id: i32) -> Result<IsoCountry> {
         Err(anyhow::anyhow!("Cannot delete from static repository"))
     }
 
-    fn delete_many<M>(&self, _ids: M) -> Result<Vec<IsoCountry>>
+    fn delete_many<M>(&mut self, _ids: M) -> Result<Vec<IsoCountry>>
     where
         M: IntoIterator<Item = i32> + Send + Sync,
     {

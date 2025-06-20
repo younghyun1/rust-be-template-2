@@ -21,23 +21,27 @@ impl<'conn> CountryService<IsoCountryDieselAsyncPgRepository<'conn>> {
         Self { repo }
     }
 
-    pub async fn get_country(&self, code: i32) -> Result<Option<IsoCountry>> {
+    pub async fn get_country(&mut self, code: i32) -> Result<Option<IsoCountry>> {
         self.repo.read(code).await
     }
 
-    pub async fn create_country(&self, country: IsoCountryInsert) -> Result<IsoCountry> {
+    pub async fn create_country(&mut self, country: IsoCountryInsert) -> Result<IsoCountry> {
         self.repo.create(country).await
     }
 
-    pub async fn update_country(&self, code: i32, country: IsoCountryInsert) -> Result<IsoCountry> {
+    pub async fn update_country(
+        &mut self,
+        code: i32,
+        country: IsoCountryInsert,
+    ) -> Result<IsoCountry> {
         self.repo.update(code, country).await
     }
 
-    pub async fn delete_country(&self, code: i32) -> Result<IsoCountry> {
+    pub async fn delete_country(&mut self, code: i32) -> Result<IsoCountry> {
         self.repo.delete(code).await
     }
 
-    pub async fn list_countries(&self) -> Result<Vec<IsoCountry>> {
+    pub async fn list_countries(&mut self) -> Result<Vec<IsoCountry>> {
         self.repo.read_all().await
     }
 }
@@ -50,23 +54,23 @@ impl CountryService<IsoCountryStaticRepository> {
         Self { repo }
     }
 
-    pub fn get_country(&self, code: i32) -> Result<Option<IsoCountry>> {
+    pub fn get_country(&mut self, code: i32) -> Result<Option<IsoCountry>> {
         self.repo.read(code)
     }
 
-    pub fn create_country(&self, country: IsoCountryInsert) -> Result<IsoCountry> {
+    pub fn create_country(&mut self, country: IsoCountryInsert) -> Result<IsoCountry> {
         self.repo.create(country)
     }
 
-    pub fn update_country(&self, code: i32, country: IsoCountryInsert) -> Result<IsoCountry> {
+    pub fn update_country(&mut self, code: i32, country: IsoCountryInsert) -> Result<IsoCountry> {
         self.repo.update(code, country)
     }
 
-    pub fn delete_country(&self, code: i32) -> Result<IsoCountry> {
+    pub fn delete_country(&mut self, code: i32) -> Result<IsoCountry> {
         self.repo.delete(code)
     }
 
-    pub fn list_countries(&self) -> Result<Vec<IsoCountry>> {
+    pub fn list_countries(&mut self) -> Result<Vec<IsoCountry>> {
         self.repo.read_all()
     }
 }

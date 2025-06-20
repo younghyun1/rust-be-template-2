@@ -1,5 +1,7 @@
-use diesel::{Queryable, prelude::QueryableByName};
+use diesel::{Insertable, Queryable, prelude::QueryableByName};
 use serde_derive::{Deserialize, Serialize};
+
+use crate::domain::schema::iso_country;
 
 #[derive(Debug, Clone, Serialize, Deserialize, QueryableByName, Queryable)]
 #[diesel(table_name = iso_country)]
@@ -37,6 +39,8 @@ pub struct IsoCountryStatic {
     pub country_primary_language: i32,
 }
 
+#[derive(Insertable)]
+#[diesel(table_name = iso_country)]
 pub struct IsoCountryInsert {
     pub country_code: i32,
     pub country_alpha2: String,
