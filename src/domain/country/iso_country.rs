@@ -1,4 +1,4 @@
-use diesel::{Insertable, Queryable, prelude::QueryableByName};
+use diesel::{prelude::{AsChangeset, QueryableByName}, Insertable, Queryable};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::domain::schema::iso_country;
@@ -39,7 +39,7 @@ pub struct IsoCountryStatic {
     pub country_primary_language: i32,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, AsChangeset)] // <-- ADDED AsChangeset
 #[diesel(table_name = iso_country)]
 pub struct IsoCountryInsert {
     pub country_code: i32,
