@@ -1,12 +1,11 @@
 use std::{env, fs, path::Path};
 
-use postgres::{Client, NoTls};
+use postgres::{Client, NoTls, Row};
 
 fn main() {
     dotenvy::dotenv().ok();
 
     let out_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not found");
-
     // Get DB info from .env variables for connection
     let db_host = env::var("DB_HOST").expect("DB_HOST not found");
     let db_port = env::var("DB_PORT").expect("DB_PORT not found");
@@ -40,9 +39,19 @@ fn main() {
         )
         .expect("Failed to query iso_country");
 
-    // Serialize each DB row as IsoCountryStatic for Rust code
+    let repo_body = gen_country_static_code(&rows);
+    fs::write(&static_out_path, repo_body).expect("Unable to write iso_country_static_gen.rs");
+}
+
+/// Formats a Rust 'static str literal (with proper escaping).
+fn literal_str(s: &str) -> String {
+    let s = s.replace('\\', "\\\\").replace('\"', "\\\"");
+    format!("\"{}\"", s)
+}
+
+/// Generate Rust code for the static ISO country table and lookup PHF maps.
+fn gen_country_static_code(rows: &[Row]) -> String {
     let mut countries = String::new();
-    // For PHF maps
     let mut code_keyvals = String::new();
     let mut alpha2_keyvals = String::new();
     let mut alpha3_keyvals = String::new();
@@ -57,6 +66,7 @@ fn main() {
         let country_flag: String = row.get(6);
         let is_country: bool = row.get(7);
         let country_primary_language: i32 = row.get(8);
+
         let s = format!(
             "    IsoCountryStatic {{
         country_code: {country_code},
@@ -82,7 +92,6 @@ fn main() {
         );
         countries.push_str(&s);
 
-        // PHF maps: value is the index in array
         code_keyvals.push_str(&format!(
             "{code}i32 => &ISO_COUNTRIES[{idx}],\n",
             code = country_code,
@@ -102,14 +111,7 @@ fn main() {
 
     let n_countries = rows.len();
 
-    // Formats a Rust 'static str literal (with proper escaping).
-    fn literal_str(s: &str) -> String {
-        let s = s.replace('\\', "\\\\").replace('\"', "\\\"");
-        format!("\"{}\"", s)
-    }
-
-    // Build const array + PHF map code
-    let repo_body = format!(
+    format!(
         r#"// This file is @generated automatically by build.rs; do not edit manually.
 
 use crate::domain::country::iso_country::IsoCountryStatic;
@@ -153,7 +155,5 @@ pub fn by_alpha3(alpha3: &str) -> Option<&'static IsoCountryStatic> {{
         code_keyvals = code_keyvals,
         alpha2_keyvals = alpha2_keyvals,
         alpha3_keyvals = alpha3_keyvals
-    );
-
-    fs::write(&static_out_path, repo_body).expect("Unable to write iso_country_static_gen.rs");
+    )
 }
