@@ -4,6 +4,7 @@ use crate::domain::schema::iso_country;
 
 use anyhow::Result;
 use async_trait::async_trait;
+use diesel::dsl::insert_into;
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 
 /// A repository that wraps a mutable reference to an active connection.
@@ -41,9 +42,27 @@ impl<'conn> AsyncRepository<i32, IsoCountry, IsoCountryInsert>
         Ok(res)
     }
 
-    async fn create_many(&mut self, _entities: Vec<IsoCountryInsert>) -> Result<Vec<IsoCountry>> {
-        // Use self.conn
-        todo!()
+    async fn create_many(&mut self, entities: Vec<IsoCountryInsert>) -> Result<Vec<IsoCountry>> {
+        if entities.is_empty() {
+            return Ok(vec![]);
+        }
+
+        let res = insert_into(iso_country::table)
+            .values(&entities)
+            .returning(iso_country::all_columns)
+            .get_results::<IsoCountry>(self.conn)
+            .await
+            .map_err(|e| match e {
+                diesel::result::Error::DatabaseError(
+                    diesel::result::DatabaseErrorKind::UniqueViolation,
+                    _,
+                ) => anyhow::anyhow!(
+                    "At least one country code or alpha2/alpha3 not unique: {}",
+                    e
+                ),
+                _ => anyhow::anyhow!("DB batch insertion error: {}", e),
+            })?;
+        Ok(res)
     }
 
     async fn read(&mut self, _id: i32) -> Result<Option<IsoCountry>> {
