@@ -28,8 +28,8 @@ fn main() {
     let mut client = Client::connect(&db_url, NoTls).expect("Could not connect to Postgres");
 
     // Query all rows from iso_country and emit them as Rust code for a const [IsoCountry; N]
-    let static_out_path = Path::new(&out_dir)
-        .join("src/domain/country/repository/iso_country_static_gen.rs");
+    let static_out_path =
+        Path::new(&out_dir).join("src/domain/country/repository/iso_country_static_gen.rs");
 
     let rows = client
         .query(
@@ -42,7 +42,12 @@ fn main() {
 
     // Serialize each DB row as IsoCountryStatic for Rust code
     let mut countries = String::new();
-    for row in &rows {
+    // For PHF maps
+    let mut code_keyvals = String::new();
+    let mut alpha2_keyvals = String::new();
+    let mut alpha3_keyvals = String::new();
+
+    for (i, row) in rows.iter().enumerate() {
         let country_code: i32 = row.get(0);
         let country_alpha2: String = row.get(1);
         let country_alpha3: String = row.get(2);
@@ -63,7 +68,8 @@ fn main() {
         country_flag: {country_flag},
         is_country: {is_country},
         country_primary_language: {country_primary_language},
-    }},\n",
+    }},
+",
             country_code = country_code,
             alpha2 = literal_str(&country_alpha2),
             alpha3 = literal_str(&country_alpha3),
@@ -75,7 +81,26 @@ fn main() {
             country_primary_language = country_primary_language
         );
         countries.push_str(&s);
+
+        // PHF maps: value is the index in array
+        code_keyvals.push_str(&format!(
+            "{code}i32 => &ISO_COUNTRIES[{idx}],\n",
+            code = country_code,
+            idx = i
+        ));
+        alpha2_keyvals.push_str(&format!(
+            "{alpha2} => &ISO_COUNTRIES[{idx}],\n",
+            alpha2 = literal_str(&country_alpha2),
+            idx = i
+        ));
+        alpha3_keyvals.push_str(&format!(
+            "{alpha3} => &ISO_COUNTRIES[{idx}],\n",
+            alpha3 = literal_str(&country_alpha3),
+            idx = i
+        ));
     }
+
+    let n_countries = rows.len();
 
     // Formats a Rust 'static str literal (with proper escaping).
     fn literal_str(s: &str) -> String {
@@ -83,32 +108,52 @@ fn main() {
         format!("\"{}\"", s)
     }
 
-    // Build const array code
+    // Build const array + PHF map code
     let repo_body = format!(
-"// This file is @generated automatically by build.rs; do not edit manually.
+        r#"// This file is @generated automatically by build.rs; do not edit manually.
 
 use crate::domain::country::iso_country::IsoCountryStatic;
+use phf::{{phf_map, Map}};
 
-/// All ISO country rows statically loaded at compile time
-pub const ISO_COUNTRIES: &[IsoCountryStatic] = &[
+/// All ISO country rows statically loaded at compile time.
+pub static ISO_COUNTRIES: [IsoCountryStatic; {len}] = [
 {countries}
 ];
 
-/// Static index on country_code
+/// PHF static maps for fast lookup by code, alpha2, alpha3.
+pub static BY_CODE: Map<i32, &'static IsoCountryStatic> = phf_map! {{
+{code_keyvals}
+}};
+
+pub static BY_ALPHA2: Map<&'static str, &'static IsoCountryStatic> = phf_map! {{
+{alpha2_keyvals}
+}};
+
+pub static BY_ALPHA3: Map<&'static str, &'static IsoCountryStatic> = phf_map! {{
+{alpha3_keyvals}
+}};
+
+/// Lookup by numeric country code.
 pub fn by_code(code: i32) -> Option<&'static IsoCountryStatic> {{
-    ISO_COUNTRIES.iter().find(|c| c.country_code == code)
+    BY_CODE.get(&code).copied()
 }}
 
+/// Lookup by country alpha-2 code.
 pub fn by_alpha2(alpha2: &str) -> Option<&'static IsoCountryStatic> {{
-    ISO_COUNTRIES.iter().find(|c| c.country_alpha2 == alpha2)
+    BY_ALPHA2.get(alpha2).copied()
 }}
 
+/// Lookup by country alpha-3 code.
 pub fn by_alpha3(alpha3: &str) -> Option<&'static IsoCountryStatic> {{
-    ISO_COUNTRIES.iter().find(|c| c.country_alpha3 == alpha3)
+    BY_ALPHA3.get(alpha3).copied()
 }}
-"
+"#,
+        len = n_countries,
+        countries = countries,
+        code_keyvals = code_keyvals,
+        alpha2_keyvals = alpha2_keyvals,
+        alpha3_keyvals = alpha3_keyvals
     );
 
-    fs::write(&static_out_path, repo_body)
-        .expect("Unable to write iso_country_static_gen.rs");
+    fs::write(&static_out_path, repo_body).expect("Unable to write iso_country_static_gen.rs");
 }

@@ -68,10 +68,13 @@ serde_derive = "1.0.219"
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 bitcode = "0.6.6"
 
+# data structures
+phf = { version = "0.11.3", features = ["macros"] }
+# scc = "2.3.4"
+
 # types
 # chrono = { version = "0.4.41", features = ["serde"] }
 # chrono-tz = { version = "0.10.3", features = ["serde"] }
-# scc = "2.3.4"
 uuid = { version = "1.17.0", features = [
     "v4",
     "v7",
