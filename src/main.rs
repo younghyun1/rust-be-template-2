@@ -1,6 +1,14 @@
 use anyhow::anyhow;
 use mimalloc::MiMalloc;
 
+use crate::{
+    domain::country::service::country_service::CountryService,
+    state::{
+        server_env_config::ServerEnvConfig,
+        server_state::{self, ServerState},
+    },
+};
+
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 
@@ -22,6 +30,26 @@ fn main() -> anyhow::Result<()> {
         // on cloud, rely on the cloud service's env-variable injectors
         if std::env::var("IS_CLOUD").is_err() {
             dotenvy::dotenv().map_err(|e| anyhow::anyhow!("Failed to load .env: {}", e))?;
+        }
+
+        let server_env_config = ServerEnvConfig::new_from_env()?;
+        let server_state = ServerState::from_config(server_env_config).await;
+
+        let mut conn = server_state.get_conn().await?;
+        let mut country_service = CountryService::new_async_pg(&mut conn);
+
+        tokio::time::sleep(tokio::time::Duration::from_millis(3000)).await;
+
+        let mut times = Vec::with_capacity(200_000);
+        for _ in 0..200_000 {
+            let start = tokio::time::Instant::now();
+            let _country = country_service.get_country(4).await?;
+            let elapsed = start.elapsed();
+            times.push(elapsed);
+        }
+        times.sort();
+        for t in &times {
+            println!("{:?}", t);
         }
 
         Ok(())
