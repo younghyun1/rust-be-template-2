@@ -2,7 +2,7 @@
 name = "rust-be-template-two"
 version = "0.1.1"
 edition = "2024"
-description = "Personal Rust backend template - now with DDD, sanity, tests, etc."
+description = "Personal Rust backend template - now with DDD, JWTs, tests, sanity, centralized cache, statelessness, containerization, etc."
 license = "MIT OR Apache-2.0"
 
 [profile.release]
@@ -15,3 +15,109 @@ lto = true
 panic = "unwind"
 
 [dependencies]
+# web framework
+# axum = { version = "0.8.4", features = [
+#     "http2",
+#     "multipart",
+#     "ws",
+#     "macros",
+#     "multipart",
+# ] }
+# axum-extra = { version = "0.10.1", features = ["cookie", "attachment", "form"] }
+# axum-server = { version = "0.7.2", features = ["tls-rustls", "tokio-rustls"] }
+# tower-http = { version = "0.6.6", features = [
+#     "compression-gzip",
+#     "trace",
+#     "cors",
+#     "fs",
+# ] }
+
+# parallelism
+# rayon = "1.10.0"
+
+# ORM
+diesel = { version = "2.2.11", features = [
+    "postgres",
+    "chrono",
+    "serde_json",
+    "uuid",
+] }
+diesel-async = { version = "0.5.2", features = ["bb8", "postgres"] }
+
+
+# .env loading
+dotenvy = "0.15.7"
+
+# async runtime
+tokio = { version = "1.45.1", features = ["full"] }
+
+# loggers
+# tracing = { version = "0.1.41", features = ["std"] }
+# tracing-subscriber = { version = "0.3.19", features = ["fmt", "json"] }
+# tracing-appender = "0.2.3"
+
+# error
+anyhow = "1.0.98"
+
+# number of cpus
+# num_cpus = "1.17.0"
+
+# serialization/deserialization
+serde = "1.0.219"
+serde_derive = "1.0.219"
+serde_json = { version = "1.0.140", features = ["preserve_order"] }
+bitcode = "0.6.6"
+
+# types
+# chrono = { version = "0.4.41", features = ["serde"] }
+# chrono-tz = { version = "0.10.3", features = ["serde"] }
+# scc = "2.3.4"
+uuid = { version = "1.17.0", features = [
+    "v4",
+    "v7",
+    "serde",
+    "zerocopy",
+    "fast-rng",
+] }
+
+# regex/verification
+# regex = { version = "1.11.1", features = ["perf-dfa-full"] }
+# email_address = "0.2.9"
+
+# crypto/rand
+# argon2 = "0.5.3"
+# rand = "0.8.5"
+rustls = { version = "0.23.28", features = [] }
+# zeroize = { version = "1.8.1", features = ["derive"] }
+
+# memory allocator
+mimalloc = "0.1.47"
+
+# email
+# lettre = { version = "0.11.17", default-features = false, features = [
+#     "builder",
+#     "hostname",
+#     "pool",
+#     "smtp-transport",
+#     "tokio1",
+#     "tokio1-rustls-tls",
+#     "tracing",
+#     "serde",
+# ] }
+
+# compression
+# zstd = { version = "0.13.3", features = ["fat-lto", "zstdmt", "pkg-config"] }
+
+# numeric
+# bigdecimal = { version = "0.4.8", features = ["serde"] }
+
+# image processing
+# image = "0.25.6"
+
+# markdown
+# comrak = { version = "0.39.0", features = ["emojis", "shortcodes"] }
+
+[build-dependencies]
+dotenvy = "0.15.7"
+postgres = "0.19.10"
+chrono = { version = "0.4.41" }
