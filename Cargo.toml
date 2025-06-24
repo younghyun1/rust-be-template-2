@@ -127,3 +127,4 @@ async-trait = "0.1.88"
 dotenvy = "0.15.7"
 postgres = "0.19.10"
 chrono = { version = "0.4.41" }
+serde_json = { version = "1.0.140", features = ["preserve_order"] }

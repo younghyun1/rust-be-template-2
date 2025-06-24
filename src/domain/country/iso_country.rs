@@ -1,4 +1,7 @@
-use diesel::{prelude::{AsChangeset, QueryableByName}, Insertable, Queryable};
+use diesel::{
+    Insertable, Queryable,
+    prelude::{AsChangeset, QueryableByName},
+};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::domain::schema::iso_country;

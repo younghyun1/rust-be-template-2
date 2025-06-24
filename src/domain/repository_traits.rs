@@ -28,7 +28,8 @@ macro_rules! impl_async_crud_repository_for {
             use $schema_module as schema; // Alias the provided schema path.
 
             #[async_trait::async_trait]
-            impl<'conn> $crate::domain::repository_traits::AsyncRepository<$id_type, $entity, $insertable>
+            impl<'conn>
+                $crate::domain::repository_traits::AsyncRepository<$id_type, $entity, $insertable>
                 for $repo_struct<'conn>
             {
                 async fn create(&mut self, entity: $insertable) -> anyhow::Result<$entity> {
@@ -43,7 +44,10 @@ macro_rules! impl_async_crud_repository_for {
                         .map_err(|e| anyhow!("DB creation error: {}", e))
                 }
 
-                async fn create_many(&mut self, entities: Vec<$insertable>) -> anyhow::Result<Vec<$entity>> {
+                async fn create_many(
+                    &mut self,
+                    entities: Vec<$insertable>,
+                ) -> anyhow::Result<Vec<$entity>> {
                     use anyhow::anyhow;
                     use diesel_async::RunQueryDsl;
 
@@ -81,7 +85,11 @@ macro_rules! impl_async_crud_repository_for {
                         .map_err(|e| anyhow!("DB read_all error: {}", e))
                 }
 
-                async fn update(&mut self, id: $id_type, entity: $insertable) -> anyhow::Result<$entity> {
+                async fn update(
+                    &mut self,
+                    id: $id_type,
+                    entity: $insertable,
+                ) -> anyhow::Result<$entity> {
                     use anyhow::anyhow;
                     use diesel::prelude::*;
                     use diesel_async::RunQueryDsl;
@@ -99,7 +107,9 @@ macro_rules! impl_async_crud_repository_for {
                     M: IntoIterator<Item = ($id_type, $insertable)> + Send + Sync,
                 {
                     use anyhow::anyhow;
-                    Err(anyhow!("Generic `update_many` is not implemented due to its complexity."))
+                    Err(anyhow!(
+                        "Generic `update_many` is not implemented due to its complexity."
+                    ))
                 }
 
                 async fn delete(&mut self, id: $id_type) -> anyhow::Result<$entity> {
