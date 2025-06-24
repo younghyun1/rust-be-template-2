@@ -149,7 +149,6 @@ macro_rules! impl_async_crud_repository_for {
 
 /// A basic async CRUD repository abstraction where all methods require mutable access to self.
 #[async_trait]
-#[allow(unused)]
 pub trait AsyncRepository<ID, Entity, EntityInsert>: Send + Sync {
     async fn create(&mut self, entity: EntityInsert) -> anyhow::Result<Entity>;
     async fn create_many(&mut self, entities: Vec<EntityInsert>) -> anyhow::Result<Vec<Entity>>;
@@ -167,7 +166,6 @@ pub trait AsyncRepository<ID, Entity, EntityInsert>: Send + Sync {
 
 /// A synchronous CRUD repository abstraction.
 #[async_trait]
-#[allow(unused)]
 pub trait SyncRepository<ID, Entity, EntityInsert>: Send + Sync {
     fn create(&mut self, entity: EntityInsert) -> anyhow::Result<Entity>;
     fn create_many(&mut self, entities: Vec<EntityInsert>) -> anyhow::Result<Vec<Entity>>;

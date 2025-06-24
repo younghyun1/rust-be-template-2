@@ -43,6 +43,22 @@ fn main() {
     let repo_body = gen_country_static_code(&rows);
     fs::write(&static_out_path, repo_body).expect("Unable to write iso_country_static_gen.rs");
 
+    // === iso_country_subdivision codegen: ===
+    let static_subdiv_path = Path::new(&out_dir)
+        .join("src/domain/country_subdivision/repository/iso_country_subdivision_static_gen.rs");
+
+    let subdivision_rows = client
+        .query(
+            "SELECT subdivision_id, country_code, subdivision_code, subdivision_name, subdivision_type \
+             FROM iso_country_subdivision ORDER BY subdivision_id",
+            &[],
+        )
+        .expect("Failed to query iso_country_subdivision");
+
+    let suburb_body = gen_country_subdivision_static_code(&subdivision_rows);
+    fs::write(&static_subdiv_path, suburb_body)
+        .expect("Unable to write iso_country_subdivision_static_gen.rs");
+
     // === build_info.rs codegen: ===
     // Get project name and version from environment variables set by Cargo
     let pkg_name = env::var("CARGO_PKG_NAME").unwrap_or_else(|_| "unknown".to_string());
@@ -230,6 +246,108 @@ pub fn by_alpha3(alpha3: &str) -> Option<&'static IsoCountryStatic> {{
     )
 }
 
+// Generate Rust code for the static ISO country subdivision table and lookup PHF maps.
+fn gen_country_subdivision_static_code(rows: &[Row]) -> String {
+    let mut subdivisions = String::new();
+    let mut id_keyvals = String::new();
+    let mut country_map: std::collections::BTreeMap<i32, Vec<usize>> =
+        std::collections::BTreeMap::new();
+
+    for (i, row) in rows.iter().enumerate() {
+        let subdivision_id: i32 = row.get(0);
+        let country_code: i32 = row.get(1);
+        let subdivision_code: String = row.get(2);
+        let subdivision_name: String = row.get(3);
+        let subdivision_type: Option<String> = row.get(4);
+
+        let type_expr = match &subdivision_type {
+            Some(s) => format!("Some({})", literal_str(s)),
+            None => "None".to_string(),
+        };
+        subdivisions.push_str(&format!(
+            "    IsoCountrySubdivisionStatic {{
+        subdivision_id: {sub_id},
+        country_code: {country_code},
+        subdivision_code: {sub_code},
+        subdivision_name: {sub_name},
+        subdivision_type: {type_expr},
+    }},
+",
+            sub_id = subdivision_id,
+            country_code = country_code,
+            sub_code = literal_str(&subdivision_code),
+            sub_name = literal_str(&subdivision_name),
+            type_expr = type_expr,
+        ));
+        id_keyvals.push_str(&format!(
+            "{sub_id}i32 => &ISO_COUNTRY_SUBDIVISIONS[{index}],\n",
+            sub_id = subdivision_id,
+            index = i,
+        ));
+        country_map.entry(country_code).or_default().push(i);
+    }
+
+    // Build country_code => &[...] mappings with static arrays
+    let mut country_slices = String::new();
+    let mut country_keys = String::new();
+    for (cc, entries) in &country_map {
+        let slice_name = format!("CC_{}_SUBS", cc);
+        let elems = entries
+            .iter()
+            .map(|i| format!("&ISO_COUNTRY_SUBDIVISIONS[{i}]", i = i))
+            .collect::<Vec<_>>()
+            .join(", ");
+        country_slices.push_str(&format!(
+            "pub static {slice_name}: [&IsoCountrySubdivisionStatic; {len}] = [{}];\n",
+            elems,
+            slice_name = slice_name,
+            len = entries.len()
+        ));
+        country_keys.push_str(&format!(
+            "{cc}i32 => &{slice_name} as &'static [&IsoCountrySubdivisionStatic],\n",
+            cc = cc,
+            slice_name = slice_name
+        ));
+    }
+
+    let n_subdivisions = rows.len();
+
+    format!(
+        r#"// This file is @generated automatically by build.rs; do not edit manually.
+
+use crate::domain::country_subdivision::iso_country_subdivision::IsoCountrySubdivisionStatic;
+use phf::{{phf_map, Map}};
+
+/// All ISO country subdivision rows statically loaded at compile time.
+pub static ISO_COUNTRY_SUBDIVISIONS: [IsoCountrySubdivisionStatic; {len}] = [
+{subdivisions}
+];
+
+{country_slices}
+/// PHF static maps for fast lookup.
+pub static BY_ID: Map<i32, &'static IsoCountrySubdivisionStatic> = phf_map! {{
+{id_keyvals}
+}};
+
+pub static BY_COUNTRY_CODE: Map<i32, &'static [&'static IsoCountrySubdivisionStatic]> = phf_map! {{
+{country_keys}
+}};
+
+pub fn by_id(id: i32) -> Option<&'static IsoCountrySubdivisionStatic> {{
+    BY_ID.get(&id).copied()
+}}
+pub fn by_country_code(code: i32) -> &'static [&'static IsoCountrySubdivisionStatic] {{
+    BY_COUNTRY_CODE.get(&code).copied().unwrap_or(&[])
+}}
+"#,
+        len = n_subdivisions,
+        subdivisions = subdivisions,
+        id_keyvals = id_keyvals,
+        country_slices = country_slices,
+        country_keys = country_keys
+    )
+}
+
 use std::fs::File;
 use std::io::Write;
 
@@ -315,4 +433,3 @@ fn get_lib_version_map() -> Option<LibVersionMap> {
     })
 }
 
-// build-depends: chrono, serde_json, cargo-metadata (used via cargo command)

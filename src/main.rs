@@ -4,10 +4,7 @@ use tracing::info;
 
 use crate::{
     domain::country::service::country_service::CountryService,
-    state::{
-        server_env_config::ServerEnvConfig,
-        server_state::{self, ServerState},
-    },
+    state::{server_env_config::ServerEnvConfig, server_state::ServerState},
     utility::tracing::setup_tracing::setup_logging,
 };
 
@@ -20,7 +17,6 @@ pub mod state;
 pub mod utility;
 
 fn main() -> anyhow::Result<()> {
-    #[allow(unused)]
     let app_start_time = tokio::time::Instant::now();
     let _logger_raii_guard = setup_logging();
 

@@ -1,5 +1,5 @@
 pub mod country;
-pub mod subdivision {}
+pub mod country_subdivision;
 pub mod currency {}
 pub mod language {}
 

@@ -13,6 +13,8 @@ impl<'conn> IsoCountryDieselAsyncPgRepository<'conn> {
     pub fn new(conn: &'conn mut AsyncPgConnection) -> Self {
         Self { conn }
     }
+    
+    // Implement custom methods for this domain here!
 }
 
 // Automatically implement the full AsyncRepository trait for IsoCountry
