@@ -52,9 +52,9 @@ dotenvy = "0.15.7"
 tokio = { version = "1.45.1", features = ["full"] }
 
 # loggers
-# tracing = { version = "0.1.41", features = ["std"] }
-# tracing-subscriber = { version = "0.3.19", features = ["fmt", "json"] }
-# tracing-appender = "0.2.3"
+tracing = { version = "0.1.41", features = ["std"] }
+tracing-subscriber = { version = "0.3.19", features = ["fmt", "json"] }
+tracing-appender = "0.2.3"
 
 # error
 anyhow = "1.0.98"
